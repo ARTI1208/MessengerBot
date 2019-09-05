@@ -21,6 +21,7 @@ public class NotifierBot extends WebhookBotHelper {
     private static HashMap<User, User> currentContact = new HashMap<>();
 
     static {
+        System.out.println("Getting token..");
         token = System.getenv("TOKEN");
     }
 
