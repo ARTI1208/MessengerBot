@@ -8,7 +8,6 @@ public class Main {
 
     public static void main(String[] args) {
         final String portNumber = System.getenv("PORT");
-        System.out.println(portNumber);
         if (portNumber != null) {
             port(Integer.parseInt(portNumber));
         }

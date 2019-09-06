@@ -1,15 +1,15 @@
 package ru.art2000.updatenotifier;
 
-import com.pengrad.telegrambot.model.CallbackQuery;
-import com.pengrad.telegrambot.model.Message;
-import com.pengrad.telegrambot.model.Update;
-import com.pengrad.telegrambot.model.User;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.pengrad.telegrambot.model.*;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.Keyboard;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardRemove;
 import com.pengrad.telegrambot.request.SendMessage;
 
+import java.io.File;
 import java.util.*;
 
 public class MessengerBot extends WebhookBotHelper {
@@ -28,12 +28,10 @@ public class MessengerBot extends WebhookBotHelper {
 
     MessengerBot(){
         super(token);
-
     }
 
     private synchronized void sendMsg(long chatId, String s) {
         SendMessage sendMessage = new SendMessage(chatId, s);
-        sendMessage.replyMarkup(new ReplyKeyboardRemove());
         try {
             execute(sendMessage);
         } catch (Exception e) {
@@ -89,7 +87,12 @@ public class MessengerBot extends WebhookBotHelper {
                 }
 
                 System.out.println("User" + message.contact());
-                buttons[i] = new InlineKeyboardButton(user.firstName() + " " + user.lastName());
+
+                String firstOrFullName = (user.lastName() == null || user.lastName().isEmpty())
+                        ? user.firstName()
+                        : user.firstName() + " " + user.lastName();
+
+                buttons[i] = new InlineKeyboardButton(firstOrFullName);
                 buttons[i].callbackData("user:" + user.id());
             }
 
@@ -123,10 +126,27 @@ public class MessengerBot extends WebhookBotHelper {
         }
     }
 
+    private void saveData(Long chatId){
+        File personDir = new File(String.valueOf(chatId.longValue()));
+        if (!personDir.exists()){
+            personDir.mkdirs();
+        }
+        Gson gson = new Gson();
+        System.out.println("AvPartners||" + gson.toJson(availablePartners));
+    }
+
+    private void restoreData(Long chatId){
+
+    }
+
     @Override
     protected void onReceiveWebhookUpdate(Update update) {
         Message message = update.message();
-//        Chat chat = message.chat();
+        if (message == null){
+            return;
+        }
+        Chat chat = message.chat();
+        restoreData(chat.id());
         if (update.callbackQuery() != null) {
             proceedCallback(update.callbackQuery());
         } else if (message.text().startsWith("/")) {
@@ -137,6 +157,7 @@ public class MessengerBot extends WebhookBotHelper {
         } else {
             sendMsg(message.from().id(), message.text());
         }
+        saveData(chat.id());
         System.out.println("Update " + update + " at " + new Date().toString());
         System.out.println("Message " + message + " at " + new Date().toString());
 //        System.out.println("Chat " + chat + " at " + new Date().toString());
