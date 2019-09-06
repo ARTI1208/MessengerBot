@@ -9,6 +9,7 @@ import com.pengrad.telegrambot.model.request.Keyboard;
 import com.pengrad.telegrambot.model.request.ReplyKeyboardRemove;
 import com.pengrad.telegrambot.request.SendMessage;
 
+import java.io.*;
 import java.io.File;
 import java.util.*;
 
@@ -20,6 +21,8 @@ public class MessengerBot extends WebhookBotHelper {
     private static HashMap<User, List<User>> userPartners = new HashMap<>();
 
     private static HashMap<User, User> currentContact = new HashMap<>();
+
+    Gson gson = new Gson();
 
     static {
         System.out.println("Getting token..");
@@ -128,14 +131,82 @@ public class MessengerBot extends WebhookBotHelper {
 
     private void saveData(Long chatId){
         File personDir = new File(String.valueOf(chatId.longValue()));
-        if (!personDir.exists()){
+        if (!personDir.exists()) {
             personDir.mkdirs();
         }
-        Gson gson = new Gson();
-        System.out.println("AvPartners||" + gson.toJson(availablePartners));
+
+        String jsonAvailablePartners = gson.toJson(availablePartners);
+        String jsonUserPartners = gson.toJson(userPartners);
+        String jsonCurrentPartners = gson.toJson(currentContact);
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("available")))) {
+            writer.write(jsonAvailablePartners);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(personDir.getAbsolutePath(), "partners")))) {
+            writer.write(jsonUserPartners);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(personDir.getAbsolutePath(), "current")))) {
+            writer.write(jsonCurrentPartners);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     private void restoreData(Long chatId){
+        String jsonAvailablePartners = null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(new File("available")))) {
+            jsonAvailablePartners = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (jsonAvailablePartners != null){
+            availablePartners = gson.fromJson(jsonAvailablePartners, availablePartners.getClass().getGenericSuperclass());
+            System.out.println("av partners rest||"+gson.toJson(availablePartners));
+        } else {
+            System.out.println("No av partners");
+        }
+
+        File personDir = new File(String.valueOf(chatId.longValue()));
+        if (!personDir.exists()) {
+            return;
+        }
+
+        String jsonUserPartners = null;
+        String jsonCurrentPartners = null;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(new File(personDir.getAbsolutePath(), "partners")))) {
+            jsonUserPartners = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(new File(personDir.getAbsolutePath(), "current")))) {
+            jsonCurrentPartners = reader.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        if (jsonUserPartners != null) {
+            userPartners = gson.fromJson(jsonUserPartners, userPartners.getClass().getGenericSuperclass());
+            System.out.println("us partners rest||"+gson.toJson(userPartners));
+        } else {
+            System.out.println("No us partners");
+        }
+
+        if (jsonCurrentPartners != null) {
+            currentContact = gson.fromJson(jsonCurrentPartners, currentContact.getClass().getGenericSuperclass());
+            System.out.println("cur partners rest||"+gson.toJson(currentContact));
+        } else {
+            System.out.println("No cur partners");
+        }
 
     }
 
