@@ -226,7 +226,9 @@ public class MessengerBot extends WebhookBotHelper {
             return;
         }
         Chat chat = message.chat();
-        restoreData(chat.id());
+        try {
+            restoreData(chat.id());
+        } catch (Exception e){}
         if (update.callbackQuery() != null) {
             proceedCallback(update.callbackQuery());
         } else if (message.text().startsWith("/")) {
@@ -237,7 +239,11 @@ public class MessengerBot extends WebhookBotHelper {
         } else {
             sendMsg(message.from().id(), message.text());
         }
-        saveData(chat.id());
+        try {
+            saveData(chat.id());
+        } catch (Exception e){
+
+        }
         System.out.println("Update " + update + " at " + new Date().toString());
         System.out.println("Message " + message + " at " + new Date().toString());
 //        System.out.println("Chat " + chat + " at " + new Date().toString());
