@@ -1,6 +1,5 @@
 package ru.art2000.updatenotifier;
 
-import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
@@ -8,11 +7,12 @@ import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.Keyboard;
+import com.pengrad.telegrambot.model.request.ReplyKeyboardRemove;
 import com.pengrad.telegrambot.request.SendMessage;
 
 import java.util.*;
 
-public class NotifierBot extends WebhookBotHelper {
+public class MessengerBot extends WebhookBotHelper {
 
     private static final String token;
 
@@ -26,24 +26,14 @@ public class NotifierBot extends WebhookBotHelper {
         token = System.getenv("TOKEN");
     }
 
-    static NotifierBot newBot() {
-        return new NotifierBot(token);
-    }
+    MessengerBot(){
+        super(token);
 
-    private NotifierBot(String botToken) {
-        super(botToken);
-        setUpdatesListener(updates -> {
-
-            for (Update update : updates) {
-                sendMsg(update.message().chat().id(), "Daa");
-            }
-
-            return 0;
-        });
     }
 
     private synchronized void sendMsg(long chatId, String s) {
         SendMessage sendMessage = new SendMessage(chatId, s);
+        sendMessage.replyMarkup(new ReplyKeyboardRemove());
         try {
             execute(sendMessage);
         } catch (Exception e) {
@@ -75,9 +65,16 @@ public class NotifierBot extends WebhookBotHelper {
         } else if (messageText.startsWith("exit")) {
             currentContact.remove(message.from());
         } else if (messageText.startsWith("find_partner")) {
-            SendMessage sendMessage = new SendMessage(chatId, "Choose your partner:");
 
             int size = Math.min(5, availablePartners.size());
+
+            if (size == 0){
+                sendMsg(chatId, "No available peeople to chat with");
+                return;
+            }
+
+            SendMessage sendMessage = new SendMessage(chatId, "Choose your partner:");
+
             InlineKeyboardButton[] buttons = new InlineKeyboardButton[size];
 
             Collection<User> users = availablePartners.values();
