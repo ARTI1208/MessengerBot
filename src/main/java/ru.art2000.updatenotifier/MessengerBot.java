@@ -68,7 +68,7 @@ public class MessengerBot extends WebhookBotHelper {
             int size = Math.min(5, availablePartners.size());
 
             if (size == 0) {
-                sendMsg(chatId, "No available peeople to chat with");
+                sendMsg(chatId, "No available people to chat with");
                 return;
             }
 
@@ -133,9 +133,12 @@ public class MessengerBot extends WebhookBotHelper {
             personDir.mkdirs();
         }
 
+        System.out.println("Full person file dir||" + personDir.getAbsolutePath());
+
         String jsonAvailablePartners = gson.toJson(availablePartners);
         String jsonUserPartners = gson.toJson(userPartners);
         String jsonCurrentPartners = gson.toJson(currentContact);
+
 
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("available")))) {
             writer.write(jsonAvailablePartners);
