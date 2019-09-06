@@ -19,7 +19,6 @@ task stage(type: Copy) {
 stage.dependsOn build
 
 dependencies {
-    compile 'org.springframework.boot:spring-boot-starter'
     compile 'com.sparkjava:spark-core:2.8.0'
     compile 'org.telegram:telegrambots:4.3'
     compile 'com.github.pengrad:java-telegram-bot-api:4.4.0'

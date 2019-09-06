@@ -1,11 +1,7 @@
 package ru.art2000.updatenotifier;
 
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-
 import static spark.Spark.port;
 import static spark.Spark.post;
-
-@SpringBootApplication
 
 public class Main {
 

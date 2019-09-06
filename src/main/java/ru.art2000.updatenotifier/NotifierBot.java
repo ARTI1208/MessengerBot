@@ -1,5 +1,6 @@
 package ru.art2000.updatenotifier;
 
+import com.pengrad.telegrambot.UpdatesListener;
 import com.pengrad.telegrambot.model.CallbackQuery;
 import com.pengrad.telegrambot.model.Message;
 import com.pengrad.telegrambot.model.Update;
@@ -31,6 +32,14 @@ public class NotifierBot extends WebhookBotHelper {
 
     private NotifierBot(String botToken) {
         super(botToken);
+        setUpdatesListener(updates -> {
+
+            for (Update update : updates) {
+                sendMsg(update.message().chat().id(), "Daa");
+            }
+
+            return 0;
+        });
     }
 
     private synchronized void sendMsg(long chatId, String s) {
