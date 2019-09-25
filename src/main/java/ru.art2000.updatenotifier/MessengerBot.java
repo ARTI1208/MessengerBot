@@ -1,34 +1,112 @@
 package ru.art2000.updatenotifier;
 
+import com.google.api.core.ApiFuture;
+import com.google.cloud.firestore.DocumentReference;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.cloud.firestore.Firestore;
+import com.google.firebase.cloud.FirestoreClient;
 import com.google.gson.Gson;
-import com.pengrad.telegrambot.model.*;
+import com.pengrad.telegrambot.model.CallbackQuery;
+import com.pengrad.telegrambot.model.Message;
+import com.pengrad.telegrambot.model.Update;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.model.request.InlineKeyboardButton;
 import com.pengrad.telegrambot.model.request.InlineKeyboardMarkup;
 import com.pengrad.telegrambot.model.request.Keyboard;
 import com.pengrad.telegrambot.request.SendMessage;
 
-import java.io.File;
-import java.io.*;
 import java.util.*;
 
 public class MessengerBot extends WebhookBotHelper {
 
     private static final String token;
-
-    private static HashMap<Integer, User> availablePartners = new HashMap<>();
-    private static HashMap<User, List<User>> userPartners = new HashMap<>();
-
+    private static final Firestore firestore = FirestoreClient.getFirestore();
+    private static final DocumentReference availableUsersReference =
+            firestore.collection("users").document("available");
+    private static final HashMap<String, DocumentReference> contactsListReferenceMap =
+            new HashMap<>();
+    private static final DocumentReference currentContactReference =
+            firestore.collection("users").document("current");
+    private static HashMap<String, User> availablePartners = new HashMap<>();
+    private static HashMap<User, HashMap<String, User>> userPartners = new HashMap<>();
     private static HashMap<User, User> currentContact = new HashMap<>();
-
-    Gson gson = new Gson();
+    private static Gson gson = new Gson();
+    private DebugHelper debugHelper = new DebugHelper(this);
 
     static {
         System.out.println("Getting token..");
         token = System.getenv("TOKEN");
+        System.out.println("Getting values from db");
+        System.out.println("Getting available users");
+        ApiFuture<DocumentSnapshot> future = availableUsersReference.get();
+        try {
+            DocumentSnapshot snapshot = future.get();
+            Map<String, Object> dataMap = snapshot.getData();
+            if (dataMap != null) {
+                for (Map.Entry<String, Object> pair : snapshot.getData().entrySet()) {
+                    if (pair.getValue() instanceof String) {
+                        User user = gson.fromJson((String) pair.getValue(), User.class);
+                        availablePartners.put(pair.getKey(), user);
+                    }
+                }
+            } else {
+                System.out.println("Cannot retrieve av users data map");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("Getting current contact");
+        future = currentContactReference.get();
+        try {
+            DocumentSnapshot snapshot = future.get();
+            Map<String, Object> dataMap = snapshot.getData();
+            if (dataMap != null) {
+                for (Map.Entry<String, Object> pair : snapshot.getData().entrySet()) {
+                    if (pair.getValue() instanceof String) {
+                        User contact = gson.fromJson((String) pair.getValue(), User.class);
+                        User caller = gson.fromJson(pair.getKey(), User.class);
+                        currentContact.put(caller, contact);
+                    }
+                }
+            } else {
+                System.out.println("Cannot retrieve cur contact data map");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        System.out.println("Getting contacts lists");
+        Iterable<DocumentReference> docs = firestore.collection("contacts").listDocuments();
+        try {
+            for (DocumentReference reference : docs) {
+                String callerJson = reference.getId();
+                User caller = gson.fromJson(callerJson, User.class);
+                future = reference.get();
+                DocumentSnapshot snapshot = future.get();
+                Map<String, Object> dataMap = snapshot.getData();
+                HashMap<String, User> realDataMap = userPartners.getOrDefault(caller, null);
+                if (realDataMap == null) {
+                    realDataMap = new HashMap<>();
+                    userPartners.put(caller, realDataMap);
+                }
+                if (dataMap != null) {
+                    for (Map.Entry<String, Object> pair : dataMap.entrySet()) {
+                        if (pair.getValue() instanceof String) {
+                            User contact = gson.fromJson((String) pair.getValue(), User.class);
+                            realDataMap.put(pair.getKey(), contact);
+                        }
+                    }
+                } else {
+                    System.out.println("Cannot retrieve contacts lists data map");
+                }
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     MessengerBot() {
         super(token);
+        debugHelper.sendInfoMessage("Bot was recreated " + new Date().toString());
     }
 
     private synchronized void sendMsg(long chatId, String s) {
@@ -44,26 +122,101 @@ public class MessengerBot extends WebhookBotHelper {
         return token;
     }
 
+    private void addUserToAvailablePartners(User user) {
+        availablePartners.put(String.valueOf(user.id()), user);
+        availableUsersReference.set(generateMapToSave());
+    }
+
+    private void removeUserFromAvailablePartners(User user) {
+        availablePartners.remove(String.valueOf(user.id()));
+        availableUsersReference.set(generateMapToSave());
+    }
+
+    private void addUserToContactList(User caller, User contact) {
+        HashMap<String, User> contacts = userPartners.getOrDefault(caller, null);
+        if (contacts == null) {
+            contacts = new HashMap<>();
+        }
+        contacts.put(String.valueOf(contact.id()), contact);
+        setUserContactsList(caller, contacts);
+    }
+
+    private void removeUserFromContactList(User caller, User contactToRemove) {
+        HashMap<String, User> contacts = userPartners.getOrDefault(caller, null);
+        if (contacts == null) {
+            return;
+        }
+        contacts.remove(String.valueOf(contactToRemove.id()));
+        setUserContactsList(caller, contacts);
+    }
+
+    private void setUserContactsList(User caller, HashMap<String, User> contacts) {
+        userPartners.put(caller, contacts);
+        String callerId = String.valueOf(caller.id());
+        HashMap<String, String> mapToPut = new HashMap<>();
+        for (Map.Entry<String, User> entry : contacts.entrySet()) {
+            mapToPut.put(entry.getKey(), gson.toJson(entry.getValue()));
+        }
+        String callerJson = gson.toJson(caller);
+        DocumentReference userContactsReference = contactsListReferenceMap.getOrDefault(callerJson, null);
+        if (userContactsReference == null) {
+            userContactsReference = firestore.collection("contacts").document(callerJson);
+            contactsListReferenceMap.put(callerId, userContactsReference);
+        }
+        userContactsReference.set(mapToPut);
+    }
+
+    private void setCurrentContact(User caller, User contact) {
+        if (contact != null) {
+            currentContact.put(caller, contact);
+            sendMsg(caller.id(), "You're now talking with " + contact.firstName());
+        } else if (currentContact.get(caller) != null) {
+            currentContact.remove(caller);
+        }
+
+        HashMap<String, String> mapToPut = new HashMap<>();
+        for (Map.Entry<User, User> pair : currentContact.entrySet()) {
+            mapToPut.put(gson.toJson(pair.getKey()), gson.toJson(pair.getValue()));
+        }
+        currentContactReference.set(mapToPut);
+    }
+
+
+    private HashMap<String, String> generateMapToSave() {
+        HashMap<String, String> map = new HashMap<>();
+        for (Map.Entry<String, User> pair : availablePartners.entrySet()) {
+            map.put(pair.getKey(), gson.toJson(pair.getValue()));
+        }
+        return map;
+    }
+
     private void parseCommand(Message message) {
         String messageText = message.text().substring(1);
         long chatId = message.chat().id();
-        if (messageText.startsWith("open")) {
-            if (availablePartners.containsKey(message.from().id())) {
+        String userId = String.valueOf(message.from().id());
+        if (messageText.startsWith("show")) {
+            if (availablePartners.containsKey(userId)) {
                 sendMsg(chatId, "You're already visible for others!");
             } else {
-                availablePartners.put(message.from().id(), message.from());
+                addUserToAvailablePartners(message.from());
                 sendMsg(chatId, message.from().firstName() + ", now you're visible for others!");
             }
-        } else if (messageText.startsWith("close")) {
-            if (availablePartners.containsKey(message.from().id())) {
-                availablePartners.remove(message.from().id());
+        } else if (messageText.startsWith("hide")) {
+            if (availablePartners.containsKey(userId)) {
+                removeUserFromAvailablePartners(message.from());
                 sendMsg(chatId, "You can't be found now!");
             } else {
                 sendMsg(chatId, "You're already hidden for others!");
             }
-        } else if (messageText.startsWith("exit")) {
-            currentContact.remove(message.from());
-        } else if (messageText.startsWith("find_partner")) {
+        } else if (messageText.startsWith("cancel")) {
+            User contact = currentContact.getOrDefault(message.from(), null);
+            if (contact == null) {
+                sendMsg(chatId, "Cannot exit chat because you're not in any");
+            } else {
+                sendMsg(chatId, "You've exited chat with " + contact.firstName());
+                setCurrentContact(message.from(), null);
+            }
+        } else if (messageText.startsWith("find")) {
 
             int size = Math.min(5, availablePartners.size());
 
@@ -83,173 +236,171 @@ public class MessengerBot extends WebhookBotHelper {
 
                 User user = userIterator.next();
                 if (user == null) {
-                    System.out.println("Null user at " + i);
                     continue;
                 }
-
-                System.out.println("User" + message.contact());
 
                 String firstOrFullName = (user.lastName() == null || user.lastName().isEmpty())
                         ? user.firstName()
                         : user.firstName() + " " + user.lastName();
 
                 buttons[i] = new InlineKeyboardButton(firstOrFullName);
-                buttons[i].callbackData("user:" + user.id());
+                buttons[i].callbackData("find:" + user.id());
             }
 
             Keyboard keyboard = new InlineKeyboardMarkup(buttons);
 
             sendMessage.replyMarkup(keyboard);
             execute(sendMessage);
+        } else if (messageText.startsWith("partners")) {
+
+            HashMap<String, User> contacts = userPartners.get(message.from());
+            int size = contacts == null ? 0 : contacts.size();
+
+            if (size == 0) {
+                sendMsg(chatId, "You have no contacts. Try /find them");
+                return;
+            }
+
+            SendMessage sendMessage = new SendMessage(chatId, "List of your contacts:");
+
+            InlineKeyboardButton[] buttons = new InlineKeyboardButton[size];
+
+            Collection<User> users = contacts.values();
+            Iterator<User> userIterator = users.iterator();
+
+            for (int i = 0; i < size; i++) {
+
+                User user = userIterator.next();
+                if (user == null) {
+                    continue;
+                }
+
+                buttons[i] = new InlineKeyboardButton(getUserFullName(user));
+                buttons[i].callbackData("contact:" + user.id());
+            }
+
+            Keyboard keyboard = new InlineKeyboardMarkup(buttons);
+
+            sendMessage.replyMarkup(keyboard);
+            execute(sendMessage);
+        } else if (messageText.startsWith("remove")) {
+            HashMap<String, User> contacts = userPartners.get(message.from());
+            int size = contacts == null ? 0 : contacts.size();
+
+            if (size == 0) {
+                sendMsg(chatId, "You have no contacts. Try /find them");
+                return;
+            }
+
+            SendMessage sendMessage = new SendMessage(chatId, "Click contact to remove:");
+
+            InlineKeyboardButton[] buttons = new InlineKeyboardButton[size];
+            Collection<User> users = contacts.values();
+            Iterator<User> userIterator = users.iterator();
+
+            for (int i = 0; i < size; i++) {
+
+                User user = userIterator.next();
+                if (user == null) {
+                    continue;
+                }
+
+                buttons[i] = new InlineKeyboardButton(getUserFullName(user));
+                buttons[i].callbackData("remove:" + user.id());
+            }
+
+            Keyboard keyboard = new InlineKeyboardMarkup(buttons);
+
+            sendMessage.replyMarkup(keyboard);
+            execute(sendMessage);
+        } else {
+            sendMsg(chatId, "Unknown command");
         }
     }
 
     private void proceedCallback(CallbackQuery callbackQuery) {
         String data = callbackQuery.data();
-        String userPrefix = "user:";
-        System.out.println("CallbackQuery||" + data);
-        if (data.startsWith(userPrefix)) {
-            data = data.substring(userPrefix.length());
-            User newPartner = availablePartners.getOrDefault(Integer.parseInt(data), null);
-            System.out.println("CallbackQueryPartner||" + (newPartner == null));
+        String findPrefix = "find:";
+        String contactPrefix = "contact:";
+        String removePrefix = "remove:";
+        if (data.startsWith(findPrefix)) {
+            data = data.substring(findPrefix.length());
+            User newPartner = availablePartners.getOrDefault(data, null);
             if (newPartner != null) {
-                List<User> contacts = userPartners.getOrDefault(callbackQuery.from(), null);
-                if (contacts == null) {
-                    contacts = new ArrayList<>();
-                }
-                contacts.add(newPartner);
-                userPartners.put(callbackQuery.from(), contacts);
-                currentContact.put(callbackQuery.from(), newPartner);
-                sendMsg(callbackQuery.from().id(), "You're now talking with " + newPartner.firstName());
+                addUserToContactList(callbackQuery.from(), newPartner);
+                setCurrentContact(callbackQuery.from(), newPartner);
             } else {
+                debugHelper.sendIssueMessage("Trying to add null partner");
                 sendMsg(callbackQuery.from().id(), "Something went wrong");
             }
+        } else if (data.startsWith(contactPrefix)) {
+            data = data.substring(contactPrefix.length());
+            HashMap<String, User> contacts = userPartners.getOrDefault(callbackQuery.from(), null);
+            if (contacts == null) {
+                sendMsg(callbackQuery.from().id(), "You have no contacts. Try /find them");
+                return;
+            }
+            User newCurrentContact = contacts.getOrDefault(data, null);
+            setCurrentContact(callbackQuery.from(), newCurrentContact);
+        } else if (data.startsWith(removePrefix)) {
+            data = data.substring(removePrefix.length());
+            HashMap<String, User> contacts = userPartners.getOrDefault(callbackQuery.from(), null);
+            if (contacts == null) {
+                sendMsg(callbackQuery.from().id(), "You have no contacts. Try /find them");
+                return;
+            }
+            User contactToRemove = contacts.get(data);
+            if (contactToRemove != null) {
+                removeUserFromContactList(callbackQuery.from(), contactToRemove);
+                if (currentContact.get(callbackQuery.from()) == contactToRemove) {
+                    setCurrentContact(callbackQuery.from(), null);
+                }
+                sendMsg(callbackQuery.from().id(),
+                        "You've removed " +
+                                contactToRemove.firstName() +
+                                " from your contact list");
+            } else {
+                debugHelper.sendIssueMessage("Trying to remove null partner");
+                sendMsg(callbackQuery.from().id(), "Something went wrong");
+            }
+        } else {
+            debugHelper.sendIssueMessage("Unknown callback query: " + callbackQuery.toString());
+            sendMsg(callbackQuery.from().id(), "Unknown callback query");
         }
     }
 
-    private void saveData(Long chatId) {
-        File personDir = new File(String.valueOf(chatId.longValue()));
-        if (!personDir.exists()) {
-            personDir.mkdirs();
+    private String getUserFullName(User user) {
+        String fullName = user.firstName();
+        if (user.lastName() != null && !user.lastName().isEmpty()) {
+            fullName += " " + user.lastName();
         }
-
-        System.out.println("Full person file dir||" + personDir.getAbsolutePath());
-
-        String jsonAvailablePartners = gson.toJson(availablePartners);
-        String jsonUserPartners = gson.toJson(userPartners);
-        String jsonCurrentPartners = gson.toJson(currentContact);
-
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File("available")))) {
-            writer.write(jsonAvailablePartners);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(personDir.getAbsolutePath(), "partners")))) {
-            writer.write(jsonUserPartners);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        try (BufferedWriter writer = new BufferedWriter(new FileWriter(new File(personDir.getAbsolutePath(), "current")))) {
-            writer.write(jsonCurrentPartners);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void restoreData(Long chatId) {
-        String jsonAvailablePartners = null;
-
-        File availableFile = new File("available");
-
-        if (availableFile.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(new File("available")))) {
-                jsonAvailablePartners = reader.readLine();
-                System.out.println("No av partners");
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if (jsonAvailablePartners != null) {
-                availablePartners = gson.fromJson(jsonAvailablePartners, availablePartners.getClass().getGenericSuperclass());
-                System.out.println("av partners rest||" + gson.toJson(availablePartners));
-            } else {
-                System.out.println("No av partners");
-            }
-        }
-
-        File personDir = new File(String.valueOf(chatId.longValue()));
-        if (!personDir.exists()) {
-            return;
-        }
-
-        String jsonUserPartners = null;
-        String jsonCurrentPartners = null;
-
-        File partnersFile = new File(personDir.getAbsolutePath(), "partners");
-        File currentFile = new File(personDir.getAbsolutePath(), "current");
-
-        if (partnersFile.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(partnersFile))) {
-                jsonUserPartners = reader.readLine();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            if (jsonUserPartners != null) {
-                userPartners = gson.fromJson(jsonUserPartners, userPartners.getClass().getGenericSuperclass());
-                System.out.println("us partners rest||" + gson.toJson(userPartners));
-            } else {
-                System.out.println("No us partners");
-            }
-        }
-
-        if (currentFile.exists()) {
-            try (BufferedReader reader = new BufferedReader(new FileReader(currentFile))) {
-                jsonCurrentPartners = reader.readLine();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-
-            if (jsonCurrentPartners != null) {
-                currentContact = gson.fromJson(jsonCurrentPartners, currentContact.getClass().getGenericSuperclass());
-                System.out.println("cur partners rest||" + gson.toJson(currentContact));
-            } else {
-                System.out.println("No cur partners");
-            }
-        }
+        return fullName;
     }
 
     @Override
     protected void onReceiveWebhookUpdate(Update update) {
         Message message = update.message();
-        if (message == null) {
+        if (message == null && update.callbackQuery() == null) {
+            debugHelper.sendIssueMessage("This type of update is not supported: " + update.toString());
             return;
         }
-        Chat chat = message.chat();
-        try {
-            restoreData(chat.id());
-        } catch (Exception e){}
+
         if (update.callbackQuery() != null) {
             proceedCallback(update.callbackQuery());
-        } else if (message.text().startsWith("/")) {
-            parseCommand(message);
-        } else if (currentContact.containsKey(message.from())) {
-            User partner = currentContact.get(message.from());
-            sendMsg(partner.id(), message.text());
+        } else if (message != null){
+            if (message.text().startsWith("/")) {
+                parseCommand(message);
+            } else if (currentContact.containsKey(message.from())) {
+                User partner = currentContact.get(message.from());
+                String messageText = "Message from " + getUserFullName(message.from()) + ":\n" + message.text();
+                sendMsg(partner.id(), messageText);
+            } else {
+                sendMsg(message.from().id(), message.text());
+            }
         } else {
-            sendMsg(message.from().id(), message.text());
+            debugHelper.sendIssueMessage("Cannot parse webhook data correctly: " + update.toString());
         }
-        try {
-            saveData(chat.id());
-        } catch (Exception e){
 
-        }
-        System.out.println("Update " + update + " at " + new Date().toString());
-        System.out.println("Message " + message + " at " + new Date().toString());
-//        System.out.println("Chat " + chat + " at " + new Date().toString());
     }
 
 }
