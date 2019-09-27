@@ -309,6 +309,14 @@ public class MessengerBot extends WebhookBotHelper {
 
             sendMessage.replyMarkup(keyboard);
             execute(sendMessage);
+        } else if (messageText.startsWith("start")) {
+            sendMsg(chatId, "Ancient evil has awakened!\n\n" +
+                    "Commands:\n" +
+                    "/show - Makes you available to be found by other users\n" +
+                    "/hide - Makes you unavailable to be found by other users\n" +
+                    "/find - Lists available users to start chat with\n" +
+                    "/partners - Lists users you have chat with\n" +
+                    "/remove - Lists partners you can delete chat with");
         } else {
             sendMsg(chatId, "Unknown command");
         }
