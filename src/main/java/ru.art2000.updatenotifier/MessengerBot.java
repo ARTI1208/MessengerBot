@@ -218,7 +218,7 @@ public class MessengerBot extends WebhookBotHelper {
             }
         } else if (messageText.startsWith("find")) {
 
-            int size = Math.min(5, availablePartners.size());
+            int size = availablePartners.size();
 
             if (size == 0) {
                 sendMsg(chatId, "No available people to chat with");
@@ -227,7 +227,7 @@ public class MessengerBot extends WebhookBotHelper {
 
             SendMessage sendMessage = new SendMessage(chatId, "Choose your partner:");
 
-            InlineKeyboardButton[] buttons = new InlineKeyboardButton[size];
+            InlineKeyboardButton[][] buttons = new InlineKeyboardButton[size][1];
 
             Collection<User> users = availablePartners.values();
             Iterator<User> userIterator = users.iterator();
@@ -239,12 +239,8 @@ public class MessengerBot extends WebhookBotHelper {
                     continue;
                 }
 
-                String firstOrFullName = (user.lastName() == null || user.lastName().isEmpty())
-                        ? user.firstName()
-                        : user.firstName() + " " + user.lastName();
-
-                buttons[i] = new InlineKeyboardButton(firstOrFullName);
-                buttons[i].callbackData("find:" + user.id());
+                buttons[i][0] = new InlineKeyboardButton(getUserFullName(user));
+                buttons[i][0].callbackData("find:" + user.id());
             }
 
             Keyboard keyboard = new InlineKeyboardMarkup(buttons);
@@ -263,7 +259,7 @@ public class MessengerBot extends WebhookBotHelper {
 
             SendMessage sendMessage = new SendMessage(chatId, "List of your contacts:");
 
-            InlineKeyboardButton[] buttons = new InlineKeyboardButton[size];
+            InlineKeyboardButton[][] buttons = new InlineKeyboardButton[size][1];
 
             Collection<User> users = contacts.values();
             Iterator<User> userIterator = users.iterator();
@@ -275,8 +271,8 @@ public class MessengerBot extends WebhookBotHelper {
                     continue;
                 }
 
-                buttons[i] = new InlineKeyboardButton(getUserFullName(user));
-                buttons[i].callbackData("contact:" + user.id());
+                buttons[i][0] = new InlineKeyboardButton(getUserFullName(user));
+                buttons[i][0].callbackData("contact:" + user.id());
             }
 
             Keyboard keyboard = new InlineKeyboardMarkup(buttons);
@@ -294,7 +290,7 @@ public class MessengerBot extends WebhookBotHelper {
 
             SendMessage sendMessage = new SendMessage(chatId, "Click contact to remove:");
 
-            InlineKeyboardButton[] buttons = new InlineKeyboardButton[size];
+            InlineKeyboardButton[][] buttons = new InlineKeyboardButton[size][1];
             Collection<User> users = contacts.values();
             Iterator<User> userIterator = users.iterator();
 
@@ -305,8 +301,8 @@ public class MessengerBot extends WebhookBotHelper {
                     continue;
                 }
 
-                buttons[i] = new InlineKeyboardButton(getUserFullName(user));
-                buttons[i].callbackData("remove:" + user.id());
+                buttons[i][0] = new InlineKeyboardButton(getUserFullName(user));
+                buttons[i][0].callbackData("remove:" + user.id());
             }
 
             Keyboard keyboard = new InlineKeyboardMarkup(buttons);
