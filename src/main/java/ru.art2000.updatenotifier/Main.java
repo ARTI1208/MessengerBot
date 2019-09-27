@@ -25,11 +25,14 @@ public class Main {
             try (FileWriter writer = new FileWriter("firebase/serviceKey.json")) {
                 writer.write(System.getenv("FIREBASE_CONFIG"));
             }
+            String firebaseDatabaseUrl = System.getenv("FIRESTORE_DB");
             try (FileInputStream serviceAccount = new FileInputStream("firebase/serviceKey.json")) {
-                FirebaseOptions options = new FirebaseOptions.Builder()
-                        .setCredentials(GoogleCredentials.fromStream(serviceAccount))
-                        .build();
-                FirebaseApp.initializeApp(options);
+                FirebaseOptions.Builder optionsBuilder = new FirebaseOptions.Builder()
+                        .setCredentials(GoogleCredentials.fromStream(serviceAccount));
+                if (firebaseDatabaseUrl != null){
+                    optionsBuilder.setDatabaseUrl(firebaseDatabaseUrl);
+                }
+                FirebaseApp.initializeApp(optionsBuilder.build());
             }
         } catch (IOException e) {
             System.out.println("Cannot start Firebase");

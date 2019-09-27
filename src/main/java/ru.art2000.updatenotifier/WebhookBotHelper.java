@@ -17,17 +17,14 @@ public abstract class WebhookBotHelper extends TelegramBot implements Route {
 
     protected abstract void onReceiveWebhookUpdate(com.pengrad.telegrambot.model.Update update);
 
-    protected void onJsonReceive(String json){}
-
     @Override
     public Object handle(Request request, Response response) {
 
         System.out.println("Req||" + request.body());
         System.out.println("Resp||" + response.body());
-
         Update update = gson.fromJson(request.body(), com.pengrad.telegrambot.model.Update.class);
         System.out.println("Updd||" + update);
-//        onJsonReceive(request.body());
+
         onReceiveWebhookUpdate(update);
 
         return "ok";
