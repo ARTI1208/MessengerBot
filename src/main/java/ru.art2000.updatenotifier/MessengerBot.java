@@ -257,7 +257,7 @@ public class MessengerBot extends WebhookBotHelper {
             int size = contacts == null ? 0 : contacts.size();
 
             if (size == 0) {
-                sendMsg(chatId, "You have no contacts. Try /find them");
+                sendMsg(chatId, "You have no contacts. Try to /find them");
                 return;
             }
 
@@ -288,7 +288,7 @@ public class MessengerBot extends WebhookBotHelper {
             int size = contacts == null ? 0 : contacts.size();
 
             if (size == 0) {
-                sendMsg(chatId, "You have no contacts. Try /find them");
+                sendMsg(chatId, "You have no contacts. Try to /find them");
                 return;
             }
 
@@ -330,23 +330,28 @@ public class MessengerBot extends WebhookBotHelper {
                 addUserToContactList(callbackQuery.from(), newPartner);
                 setCurrentContact(callbackQuery.from(), newPartner);
             } else {
-                debugHelper.sendIssueMessage("Trying to add null partner");
-                sendMsg(callbackQuery.from().id(), "Something went wrong");
+                sendMsg(callbackQuery.from().id(), "This user is not available now. " +
+                        "Rerun /find to get updated list of available partners");
             }
         } else if (data.startsWith(contactPrefix)) {
             data = data.substring(contactPrefix.length());
             HashMap<String, User> contacts = userPartners.getOrDefault(callbackQuery.from(), null);
             if (contacts == null) {
-                sendMsg(callbackQuery.from().id(), "You have no contacts. Try /find them");
+                sendMsg(callbackQuery.from().id(), "You have no contacts. Try to /find them");
                 return;
             }
             User newCurrentContact = contacts.getOrDefault(data, null);
+            if (newCurrentContact == null) {
+                sendMsg(callbackQuery.from().id(), "Cannot select user that is not in your contacts list. " +
+                        "Rerun /partners to get updated list of your contacts");
+                return;
+            }
             setCurrentContact(callbackQuery.from(), newCurrentContact);
         } else if (data.startsWith(removePrefix)) {
             data = data.substring(removePrefix.length());
             HashMap<String, User> contacts = userPartners.getOrDefault(callbackQuery.from(), null);
             if (contacts == null) {
-                sendMsg(callbackQuery.from().id(), "You have no contacts. Try /find them");
+                sendMsg(callbackQuery.from().id(), "You have no contacts. Try to /find them");
                 return;
             }
             User contactToRemove = contacts.get(data);
@@ -360,8 +365,8 @@ public class MessengerBot extends WebhookBotHelper {
                                 contactToRemove.firstName() +
                                 " from your contact list");
             } else {
-                debugHelper.sendIssueMessage("Trying to remove null partner");
-                sendMsg(callbackQuery.from().id(), "Something went wrong");
+                sendMsg(callbackQuery.from().id(), "Cannot remove user that is not in your contacts list. " +
+                        "Rerun /remove to get updated list of your contacts available to remove");
             }
         } else {
             debugHelper.sendIssueMessage("Unknown callback query: " + callbackQuery.toString());
