@@ -2,15 +2,19 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="d50fd1c7-7208-44db-965a-74535dfaf6c2" name="Default Changelist" comment="">
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/executionHistory/executionHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/executionHistory/executionHistory.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/executionHistory/executionHistory.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/executionHistory/executionHistory.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/fileHashes/fileHashes.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/fileHashes/fileHashes.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/fileHashes/fileHashes.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/fileHashes/fileHashes.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/classAnalysis.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/classAnalysis.bin" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/javaCompile.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/javaCompile.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/taskHistory.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/5.4.1/javaCompile/taskHistory.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/buildOutputCleanup.lock" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" beforeDir="false" afterPath="$PROJECT_DIR$/.gradle/buildOutputCleanup/outputFiles.bin" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Procfile" beforeDir="false" afterPath="$PROJECT_DIR$/Procfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/build.gradle" beforeDir="false" afterPath="$PROJECT_DIR$/build.gradle" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/DebugHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/art2000/remessengerbot/DebugHelper.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/art2000/remessengerbot/Main.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/MessengerBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/art2000/remessengerbot/MessengerBot.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/WebhookBotHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/art2000/remessengerbot/WebhookBotHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ru/art2000/remessengerbot/MessengerBot.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru/art2000/remessengerbot/MessengerBot.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/updatenotifier.iml" beforeDir="false" afterPath="$PROJECT_DIR$/remessengerbot.iml" afterDir="false" />
     </list>
     <list id="7147380c-c5d1-48bf-974c-dbc8ecc77529" name="Revert &quot;Removed explicit db key file &amp;&amp; added debuging&quot;" comment="Revert &quot;Removed explicit db key file &amp;&amp; added debuging&quot;&#10;&#10;This reverts commit eaf5e5f1" />
     <list id="4fd25118-fc07-4d27-881d-846bf4bc0244" name="Revert &quot;Vertical list of users3&quot;" comment="Revert &quot;Vertical list of users3&quot;&#10;&#10;This reverts commit 0d4b0044" />
@@ -140,7 +144,7 @@
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="android.sdk.path" value="D:/ProgramFiles/AndroidSDK" />
     <property name="aspect.path.notification.shown" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/firebase" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="project.structure.last.edited" value="Libraries" />
@@ -216,6 +220,7 @@
       <workItem from="1569391677505" duration="653000" />
       <workItem from="1569392680051" duration="10088000" />
       <workItem from="1569431082197" duration="28732000" />
+      <workItem from="1569673901073" duration="942000" />
     </task>
     <task id="LOCAL-00001" summary="Test commit">
       <created>1567717709582</created>
@@ -273,7 +278,14 @@
       <option name="project" value="LOCAL" />
       <updated>1569612022877</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Refactoring">
+      <created>1569652350307</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1569652350307</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -332,6 +344,7 @@
     <MESSAGE value="Firebase" />
     <MESSAGE value="Added /start message" />
     <MESSAGE value="Restore db url" />
-    <option name="LAST_COMMIT_MESSAGE" value="Restore db url" />
+    <MESSAGE value="Refactoring" />
+    <option name="LAST_COMMIT_MESSAGE" value="Refactoring" />
   </component>
 </project>

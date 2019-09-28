@@ -316,6 +316,7 @@ public class MessengerBot extends WebhookBotHelper {
                     "/hide - Makes you unavailable to be found by other users\n" +
                     "/find - Lists available users to start chat with\n" +
                     "/partners - Lists users you have chat with\n" +
+                    "/cancel - Exits current chat\n" +
                     "/remove - Lists partners you can delete chat with");
         } else {
             sendMsg(chatId, "Unknown command");
