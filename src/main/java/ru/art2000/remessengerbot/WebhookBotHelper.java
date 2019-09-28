@@ -1,4 +1,4 @@
-package ru.art2000.updatenotifier;
+package ru.art2000.remessengerbot;
 
 import com.google.gson.Gson;
 import com.pengrad.telegrambot.TelegramBot;

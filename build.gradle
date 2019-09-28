@@ -1,29 +1,24 @@
 plugins {
-    id 'org.springframework.boot' version '2.1.7.RELEASE'
-    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
     id 'java'
 }
 
 group = 'ru.art2000'
-version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '1.8'
+version = '1.0.0'
 
 repositories {
     mavenCentral()
 }
 
 task stage(type: Copy) {
+    //noinspection GroovyAssignabilityCheck
     from sourceSets.main.runtimeClasspath
     into 'build/staging'
 }
 stage.dependsOn build
 
 dependencies {
-    compile 'com.sparkjava:spark-core:2.8.0'
-    compile 'org.telegram:telegrambots:4.3'
     compile 'com.github.pengrad:java-telegram-bot-api:4.4.0'
     compile 'com.google.code.gson:gson:2.8.5'
-    compile 'org.jsoup:jsoup:1.12.1'
     compile 'com.google.firebase:firebase-admin:6.10.0'
-
+    compile 'com.sparkjava:spark-core:2.8.0'
 }

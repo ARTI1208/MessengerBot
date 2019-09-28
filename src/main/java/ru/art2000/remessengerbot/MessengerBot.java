@@ -1,4 +1,4 @@
-package ru.art2000.updatenotifier;
+package ru.art2000.remessengerbot;
 
 import com.google.api.core.ApiFuture;
 import com.google.cloud.firestore.DocumentReference;

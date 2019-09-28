@@ -1,4 +1,4 @@
-package ru.art2000.updatenotifier;
+package ru.art2000.remessengerbot;
 
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
