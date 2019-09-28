@@ -3,6 +3,7 @@ package ru.art2000.updatenotifier;
 import com.google.auth.oauth2.GoogleCredentials;
 import com.google.firebase.FirebaseApp;
 import com.google.firebase.FirebaseOptions;
+import com.pengrad.telegrambot.request.SetWebhook;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -16,6 +17,7 @@ public class Main {
 
     public static void main(String[] args) {
 
+        //Setup Firebase
         try {
             File firebaseDir = new File("firebase");
             if (!firebaseDir.exists() && !firebaseDir.mkdir()) {
@@ -29,7 +31,7 @@ public class Main {
             try (FileInputStream serviceAccount = new FileInputStream("firebase/serviceKey.json")) {
                 FirebaseOptions.Builder optionsBuilder = new FirebaseOptions.Builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount));
-                if (firebaseDatabaseUrl != null){
+                if (firebaseDatabaseUrl != null) {
                     optionsBuilder.setDatabaseUrl(firebaseDatabaseUrl);
                 }
                 FirebaseApp.initializeApp(optionsBuilder.build());
@@ -39,12 +41,23 @@ public class Main {
             e.printStackTrace();
         }
 
+        //Setup working port
         final String portNumber = System.getenv("PORT");
         if (portNumber != null) {
             port(Integer.parseInt(portNumber));
         }
 
+        //Create bot
         MessengerBot bot = new MessengerBot();
         post(bot.getBotToken(), bot);
+
+        //Setup webhook
+        String appUrl = System.getenv("APP_URL");
+        if (appUrl != null) {
+            if (!appUrl.endsWith("/")) {
+                appUrl += "/";
+            }
+            bot.execute(new SetWebhook().url(appUrl + bot.getBotToken()));
+        }
     }
 }

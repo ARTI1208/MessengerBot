@@ -3,7 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="d50fd1c7-7208-44db-965a-74535dfaf6c2" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/WebhookBotHelper.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/WebhookBotHelper.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/Main.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/ru.art2000.updatenotifier/Main.java" afterDir="false" />
     </list>
     <list id="7147380c-c5d1-48bf-974c-dbc8ecc77529" name="Revert &quot;Removed explicit db key file &amp;&amp; added debuging&quot;" comment="Revert &quot;Removed explicit db key file &amp;&amp; added debuging&quot;&#10;&#10;This reverts commit eaf5e5f1" />
     <list id="4fd25118-fc07-4d27-881d-846bf4bc0244" name="Revert &quot;Vertical list of users3&quot;" comment="Revert &quot;Vertical list of users3&quot;&#10;&#10;This reverts commit 0d4b0044" />
@@ -259,7 +259,14 @@
       <option name="project" value="LOCAL" />
       <updated>1569610677160</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Restore db url">
+      <created>1569612022877</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1569612022877</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -317,6 +324,7 @@
     <MESSAGE value="Save &amp; restore data 3" />
     <MESSAGE value="Firebase" />
     <MESSAGE value="Added /start message" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added /start message" />
+    <MESSAGE value="Restore db url" />
+    <option name="LAST_COMMIT_MESSAGE" value="Restore db url" />
   </component>
 </project>
