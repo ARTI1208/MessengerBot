@@ -29,7 +29,7 @@ class DebugHelper {
     }
 
     void sendMessageSenderInfo(User user) {
-//        if (String.valueOf(user.id()).equals(chatId)) return;
+        if (String.valueOf(user.id()).equals(chatId)) return;
 
         sendInfoMessage("Received message from: " + user.toString());
     }
