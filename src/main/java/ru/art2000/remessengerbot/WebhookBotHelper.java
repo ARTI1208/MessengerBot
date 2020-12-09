@@ -9,7 +9,7 @@ import spark.Route;
 
 public abstract class WebhookBotHelper extends TelegramBot implements Route {
 
-    private Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     public WebhookBotHelper(String botToken) {
         super(botToken);
@@ -20,11 +20,7 @@ public abstract class WebhookBotHelper extends TelegramBot implements Route {
     @Override
     public Object handle(Request request, Response response) {
 
-        System.out.println("Req||" + request.body());
-        System.out.println("Resp||" + response.body());
         Update update = gson.fromJson(request.body(), com.pengrad.telegrambot.model.Update.class);
-        System.out.println("Updd||" + update);
-
         onReceiveWebhookUpdate(update);
 
         return "ok";

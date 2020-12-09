@@ -27,11 +27,11 @@ public class MessengerBot extends WebhookBotHelper {
             new HashMap<>();
     private static final DocumentReference currentContactReference =
             firestore.collection("users").document("current");
-    private static HashMap<String, User> availablePartners = new HashMap<>();
-    private static HashMap<User, HashMap<String, User>> userPartners = new HashMap<>();
-    private static HashMap<User, User> currentContact = new HashMap<>();
-    private static Gson gson = new Gson();
-    private DebugHelper debugHelper = new DebugHelper(this);
+    private static final HashMap<String, User> availablePartners = new HashMap<>();
+    private static final HashMap<User, HashMap<String, User>> userPartners = new HashMap<>();
+    private static final HashMap<User, User> currentContact = new HashMap<>();
+    private static final Gson gson = new Gson();
+    private final DebugHelper debugHelper = new DebugHelper(this);
 
     static {
         System.out.println("Getting token..");

@@ -5,8 +5,8 @@ import com.pengrad.telegrambot.request.SendMessage;
 
 class DebugHelper {
 
-    private String chatId;
-    private TelegramBot bot;
+    private final String chatId;
+    private final TelegramBot bot;
 
     DebugHelper(TelegramBot telegramBot) {
         bot = telegramBot;
