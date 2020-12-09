@@ -29,7 +29,7 @@ public class Main {
             }
             String firebaseDatabaseUrl = System.getenv("FIRESTORE_DB");
             try (FileInputStream serviceAccount = new FileInputStream("firebase/serviceKey.json")) {
-                FirebaseOptions.Builder optionsBuilder = new FirebaseOptions.Builder()
+                FirebaseOptions.Builder optionsBuilder = FirebaseOptions.builder()
                         .setCredentials(GoogleCredentials.fromStream(serviceAccount));
                 if (firebaseDatabaseUrl != null) {
                     optionsBuilder.setDatabaseUrl(firebaseDatabaseUrl);
