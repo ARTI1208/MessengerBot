@@ -1,6 +1,7 @@
 package ru.art2000.remessengerbot;
 
 import com.pengrad.telegrambot.TelegramBot;
+import com.pengrad.telegrambot.model.User;
 import com.pengrad.telegrambot.request.SendMessage;
 
 class DebugHelper {
@@ -25,6 +26,12 @@ class DebugHelper {
             bot.execute(new SendMessage(chatId, "INFO: " + text));
         }
         System.out.println("INFO: " + text);
+    }
+
+    void sendMessageSenderInfo(User user) {
+        if (String.valueOf(user.id()).equals(chatId)) return;
+
+        sendInfoMessage("Received message from: " + user.toString());
     }
 
     private boolean isDebuggingEnabled() {

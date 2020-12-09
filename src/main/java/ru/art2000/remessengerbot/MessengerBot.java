@@ -395,6 +395,10 @@ public class MessengerBot extends WebhookBotHelper {
             return;
         }
 
+        if (message != null) {
+            debugHelper.sendMessageSenderInfo(message.from());
+        }
+
         if (update.callbackQuery() != null) {
             proceedCallback(update.callbackQuery());
         } else if (message != null){
