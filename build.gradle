@@ -17,7 +17,7 @@ task stage(type: Copy) {
 stage.dependsOn build
 
 dependencies {
-    compile 'com.github.pengrad:java-telegram-bot-api:5.1.0'
+    compile 'com.github.pengrad:java-telegram-bot-api:5.6.0'
     compile 'com.google.code.gson:gson:2.8.7'
     compile 'com.google.firebase:firebase-admin:7.3.0'
     compile 'com.sparkjava:spark-core:2.9.3'
